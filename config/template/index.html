@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+
+{% block comment %}
+            <div class="container d-flex flex-wrap gap-2 " >
+                    {%for rang in color %}
+                    <a href="{% url 'color_detail' color_id=rang.id%}">
+                        <button type="submit" class="btn btn-primary px-4 py-2 w-100" >{{rang.color}}</button>
+                    </a>
+                    {% endfor %}
+            </div>
+            <div class="container d-flex flex-wrap gap-2 mt-4">
+                {% for brand in brands %}
+                    <a href="{% url 'brand_detail' brand_id=brand.id%}">
+                        <button type="submit" class="btn btn-success px-4 py-2 w-100">{{ brand.name }}</button>
+                    </a>
+                {% endfor %}
+            </div>
+            <div class="container">
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                {% for car in cars %}
+                      <div class="col">
+                        <div class="card">
+                          <div class="card-body">
+                            <p class="card-text">
+                                <a href=" {% url 'car_detail'  car.pk%} ">
+                                {% if car.photo %}
+                                    <img src="{{ car.photo.url }}" alt="{{ car.name }}" class="img-fluid">
+                                {% else %}
+                                    <p>Rasm mavjud emas</p>
+                                {% endif %}
+                                <h5 class="card-title">Model nomi:  {{ car.car_name }}</h5>
+                                <b>Model yili:</b> {{ car.date }} <br>
+                                <b>Narxi:</b> ${{ car.price }} <br>
+                                <b>Brend:</b> {{ car.brand.name }} <br>
+                                </a>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                {% endfor %}
+                </div>
+            </div>
+{% endblock comment%}

@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+
+{% block comment %}
+<main>
+         <div class="container">
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h2 class="card-title" align="center">{{color.color }}</h2>
+                        <h4>Ushbu Rangli tegishli mashinalar:</h4>
+                        <ul>
+                        {% for car in cars %}
+                            <li>
+                                <a href="{% url 'car_detail' car_id=car.id %}">
+                                    <p><b>{{ car.car_name }}</b></p>
+                                    <p>Yili: {{ car.model_year }}</p>
+                                    <p>Narxi: ${{ car.price }}</p>
+                                </a>
+                            </li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+</main>
+{% endblock comment %}

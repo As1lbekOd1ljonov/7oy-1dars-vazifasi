@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  {% include 'components/_stayles.html'%}
+</head>
+<body>
+    <header>
+    {% include 'components/_header.html'%}
+    </header>
+    {% include 'components/_massages.html'%}
+
+
+    <main>
+        {% block comment%}
+        {% endblock comment%}
+    </main>
+
+
+    <footer>
+    {% include 'components/_footer.html'%}
+    </footer>
+
+
+    {% include 'components/_scripts.html'%}
+
+</body>

@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block comment %}
+<main>
+    <div class="container">
+        <div class="card mt-4">
+            <div class="card-body">
+                <h2 class="card-title text-center">Moshina haqida to'liq ma'lumot</h2>
+                <ul>
+                    <li>
+                        <div class="text-center">
+                            {% if car.photo %}
+                                <img src="{{ car.photo.url }}" alt="{{ car.car_name }}" class="img-fluid w-100" style="max-height: 400; object-fit: cover;">
+                            {% else %}
+                                <p>Rasm mavjud emas</p>
+                            {% endif %}
+                        </div>
+                        <p><b>Nomi:</b> {{ car.car_name }}</p>
+                        <p><b>Brendi:</b> {{ car.brand }}</p>
+                        <p><b>Yili:</b> {{ car.date }}</p>
+                        <p><b>Narxi:</b> ${{ car.price }}</p>
+                        <p><b>Rangi:</b> {{ car.color }}</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <h3 class="card-title">Sharhlar</h3>
+
+                <!-- Yangi sharh qo‘shish formasi -->
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create">
+                    <div class="mb-3">
+                        <label for="comment-text" class="form-label">Sharh yozing</label>
+                        <textarea class="form-control" id="comment-text" name="text" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Yuborish</button>
+                </form>
+                <ul class="list-group mt-3">
+                    {% for comment in comments %}
+                        <li class="list-group-item">
+                            <p><b>{{ comment.user.username }}</b> - {{ comment.created_at|date:"Y-m-d H:i" }}</p>
+                            <p>{{ comment.text }}</p>
+
+                            <!-- 🔥 Faqat sharh muallifi tahrirlashi va o‘chirishi mumkin -->
+                            {% if comment.user == request.user %}
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="update">
+                                    <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                    <input type="text" name="text" value="{{ comment.text }}" class="form-control d-inline w-50">
+                                    <button type="submit" class="btn btn-warning btn-sm">O‘zgartirish</button>
+                                </form>
+
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="comment_id" value="{{ comment.id }}">
+                                    <button type="submit" class="btn btn-danger btn-sm">O‘chirish</button>
+                                </form>
+                            {% endif %}
+                        </li>
+                    {% empty %}
+                        <p>🚗 Hozircha sharhlar yo‘q. Birinchi bo‘lib fikr bildiring!</p>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</main>
+
+
+
+{% endblock comment %}

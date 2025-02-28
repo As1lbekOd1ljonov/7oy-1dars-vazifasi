@@ -1,0 +1,56 @@
+<div class="container ">
+    <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
+                <div class="container-fluid">
+                    <a class="navbar-brand mb-4" href="{% url 'index' %}">AUTOSALON</a>
+                    <button data-mdb-collapse-init class="navbar-toggler" type="button"
+                        data-mdb-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <i class="fas fa-bars"></i>
+                    </button>
+    </div>
+      <div class="d-flex align-items-center">
+        {% if not request.user.is_authenticated %}
+            <button data-mdb-ripple-init type="submit" class="btn btn-link px-3 me-2">
+            <a href="{% url 'user_login' %}">Login</a>
+            </button>
+
+            <button data-mdb-ripple-init type="submit" class="btn btn-primary me-2 px-2 py-1">
+            <a href="{% url 'user_register' %}" class="btn btn-primary  fw-bold"><b>Register</b></a>
+            </button>
+        {%else%}
+        <button data-mdb-ripple-init type="submit" class="btn btn-primary me-2 px-2 py-1">
+        <a href="{% url 'user_logout' %}" class="btn btn-primary  fw-bold"><b>Logout</b></a>
+        </button>
+              <!-- Avatar -->
+        <div class="dropdown">
+        <a
+          data-mdb-dropdown-init
+          class="dropdown-toggle d-flex align-items-center hidden-arrow"
+          href="{% url 'profile' username=request.user.username%}"
+          id="navbarDropdownMenuAvatar"
+          role="button"
+          aria-expanded="false"
+        >
+        {% if profile and profile.photo %}
+            <img src="{{ profile.photo.url }}"
+                 class="rounded-circle"
+                 height="40"
+                 alt="Profile"
+                 loading="lazy">
+        {% else %}
+            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"
+                 class="rounded-circle"
+                 height="40"
+                 alt="Profile"
+                 loading="lazy">
+        {% endif %}
+
+        </a>
+      </div>
+        {%endif%}
+      </div>
+            </nav>
+        </header>
+
+</div>
