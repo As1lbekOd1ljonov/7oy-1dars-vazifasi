@@ -109,3 +109,15 @@ class RegisterForm(UserCreationForm):
                 'id': "form3Example3cg"
             })
         }
+
+
+
+
+class SendEmail(forms.Form):
+    subject = forms.CharField(max_length=250, widget=forms.TextInput(attrs={
+        "class":'form-control'
+    }))
+    message = forms.CharField(max_length=1000, widget=forms.Textarea(attrs={
+        "class":'form-control',
+        'rows':3
+    }))

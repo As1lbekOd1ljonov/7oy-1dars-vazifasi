@@ -2,10 +2,14 @@ from django.http import HttpRequest
 from django.shortcuts import render, get_object_or_404, redirect
 from .models import Brands, Cars, Color, Comment, Profile
 from django.contrib.auth.models import User
-from .form import CarsForm, BrandsForm, ColorForm, CommentFrom, RegisterForm, LoginForm
+from .form import CarsForm, BrandsForm, ColorForm, CommentFrom, RegisterForm, LoginForm, SendEmail
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib import messages
+from django.core.mail import send_mail
+
+
+
 
 
 def index(request):
@@ -146,3 +150,26 @@ def profile(request, username):
         messages.error(request, f"{e}")
         return redirect('index')
     return render(request, "profile.html", context)
+
+
+def send_message_to_email(request):
+    if request.method == "POST":
+        form = SendEmail(data=request.POST)
+        if form.is_valid():
+            subject = form.cleaned_data.get("subject")
+            message = form.cleaned_data.get("message")
+            for user in User.objects.all():
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email='rustamovasilbek1221@gmail.com',
+                    recipient_list=[user.email]
+                )
+        messages.success(request, "Habar yuborildi")
+        return redirect('index')
+    else:
+        form = SendEmail()
+    context = {
+        'form':form
+    }
+    return render(request, 'send_main.html', context)
