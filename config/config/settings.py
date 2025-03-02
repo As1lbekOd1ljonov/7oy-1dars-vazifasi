@@ -13,8 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 
 
-from django.conf.global_settings import MEDIA_URL, STATICFILES_DIRS, EMAIL_BACKEND, EMAIL_HOST, EMAIL_USE_TLS, \
-    EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+from django.conf.global_settings import MEDIA_URL, STATICFILES_DIRS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -136,7 +135,6 @@ MEDIA_URL = 'media/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

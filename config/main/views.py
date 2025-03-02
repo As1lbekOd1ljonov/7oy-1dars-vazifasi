@@ -9,9 +9,6 @@ from django.contrib import messages
 from django.core.mail import send_mail
 
 
-
-
-
 def index(request):
     brands = Brands.objects.all()
     cars = Cars.objects.all()

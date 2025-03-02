@@ -112,7 +112,6 @@ class RegisterForm(UserCreationForm):
 
 
 
-
 class SendEmail(forms.Form):
     subject = forms.CharField(max_length=250, widget=forms.TextInput(attrs={
         "class":'form-control'

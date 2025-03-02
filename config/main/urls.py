@@ -9,7 +9,7 @@ urlpatterns = [
 
     path('brand/<int:brand_id>/', brand_detail, name='brand_detail'),
 
-    path('car/<int:car_id>/', car_detail    , name='car_detail'),
+    path('car/<int:car_id>/', car_detail, name='car_detail'),
 
     path('register/', user_register, name='user_register'),
 
@@ -18,6 +18,6 @@ urlpatterns = [
     path('logout/', user_logout, name='user_logout'),
     path('profile/<str:username>', profile, name='profile'),
 
-    path('send_message/', send_message_to_email, name='send_message'),
+    path('send_message/', send_message_to_email, name='send_message')
 
 ]
