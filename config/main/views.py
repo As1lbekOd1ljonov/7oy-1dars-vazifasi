@@ -1,5 +1,8 @@
-from django.http import HttpRequest
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.views import LoginView, LogoutView
+from django.http import HttpRequest, HttpResponseForbidden
 from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse_lazy
 from .models import Brands, Cars, Color, Comment, Profile
 from django.contrib.auth.models import User
 from .form import CarsForm, BrandsForm, ColorForm, CommentFrom, RegisterForm, LoginForm, SendEmail
@@ -7,55 +10,73 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib import messages
 from django.core.mail import send_mail
+from django.views import View
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 
-def index(request):
-    brands = Brands.objects.all()
-    cars = Cars.objects.all()
-    color = Color.objects.all()
-    context = {
-        'brands': brands,
-        'cars': cars,
-        'color': color
-    }
-    return render(request, 'index.html', context)
+class IndexListView(ListView):
+    model = Cars  # Bu qator xatoni tuzatadi
+    template_name = "index.html"
+    context_object_name = "cars"
 
-
-
-def color_detail(request, color_id):
-    color = get_object_or_404(Color, id=color_id)
-    cars = Cars.objects.filter(color=color)
-    all_color = Color.objects.all()
-    context = {
-        'color': color,
-        'cars': cars,
-        'all_color': all_color
-    }
-    return render(request, 'color_cars.html', context)
+    def get_context_data(self, **kwargs):
+        """Barcha kerakli ma’lumotlarni kontekstga qo‘shish"""
+        context = super().get_context_data(**kwargs)
+        context["brands"] = Brands.objects.all()
+        context["color"] = Color.objects.all()
+        context["cars"] = Cars.objects.all()
+        return context
 
 
 
-def brand_detail(request, brand_id):
-    brand = get_object_or_404(Brands, id=brand_id)
-    cars = Cars.objects.filter(brand=brand)
-    all_brands = Brands.objects.all()
-    context = {
-        'brand': brand,
-        'cars': cars,
-        'all_brands': all_brands
-    }
-    return render(request, 'brand_cars.html', context)
+
+class ColorDetailView(DetailView):
+    model = Color
+    template_name = "color_cars.html"
+    context_object_name = "color"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cars"] = Cars.objects.filter(color=self.object)
+        context["all_color"] = Color.objects.all()
+        return context
 
 
-@permission_required('main.view_car', raise_exception=True)
-def car_detail(request, car_id):
-    """Mashina sahifasini ko‘rsatish va sharhlarni boshqarish"""
-    car = get_object_or_404(Cars, id=car_id)
-    comment = Comment.objects.filter(car=car)
-    form = CommentFrom()
 
-    if request.method == "POST":
+class BrandDetailView(DetailView):
+    model = Brands
+    template_name = "brand_cars.html"
+    context_object_name = "brand"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["cars"] = Cars.objects.filter(brand=self.object)
+        context["all_brands"] = Brands.objects.all()
+        return context
+
+
+
+
+class CarDetailView(PermissionRequiredMixin, DetailView):
+    model = Cars
+    template_name = "car_detail.html"
+    context_object_name = "car"
+    permission_required = "main.view_car"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["comments"] = Comment.objects.filter(car=self.object)
+        context["form"] = CommentFrom()
+        return context
+
+
+class CommentManageView(View):
+    """Sharh qo‘shish, tahrirlash va o‘chirishni boshqarish"""
+
+    def post(self, request, car_id):
+        car = get_object_or_404(Cars, id=car_id)
         action = request.POST.get("action")
+        review_id = request.POST.get("review_id")
 
         if action == "create":
             form = CommentFrom(request.POST)
@@ -64,93 +85,85 @@ def car_detail(request, car_id):
                 review.car = car
                 review.user = request.user
                 review.save()
-            return redirect("car_detail", car_id=car.id)
+            return redirect("car_detail", pk=car.id)
 
-        elif action == "update":
-            review_id = request.POST.get("review_id")
+        if review_id and review_id.isdigit():
             review = get_object_or_404(Comment, id=review_id, car=car)
 
-            if request.user == review.user:
-                review.text = request.POST.get("text")
-                review.save()
+            if action == "update":
+                if request.user == review.user:
+                    review.text = request.POST.get("text")
+                    review.save()
+                return redirect("car_detail", pk=car.id)
 
-            return redirect("car_detail", car_id=car.id)
+            elif action == "delete":
+                if request.user == review.user:
+                    review.delete()
+                    return redirect("index")
+                return HttpResponseForbidden("Siz ushbu sharhni o‘chira olmaysiz!")
 
-        elif action == "delete":
-            review_id = request.POST.get("review_id")
-            review = get_object_or_404(Comment, id=review_id, car=car)
-            if request.user == review.user:
-                review.delete()
-
-            return redirect("index")
-
-    context = {
-        "car": car,
-        "comments": comment,
-        "form": form
-    }
-    return render(request, "car_detail.html", context)
+        return redirect("car_detail", pk=car.id)
 
 
-def user_register(request):
-    if request.method == "POST":
-        form = RegisterForm(data=request.POST)
-        if form.is_valid():
-            user = form.save()
-            messages.success(request, f"{user.username} muofiqiyatli qo'shildi !\n"
-                                      "Iltimos login qiling !")
-            return redirect("user_login")
+class UserRegisterView(CreateView):
+    model = User
+    form_class = RegisterForm
+    template_name = "register.html"
+    success_url = reverse_lazy("home")
 
-    else:
-        form = RegisterForm()
-    context = {
-        'form': form
-    }
-    return render(request, 'register.html', context)
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        messages.success(self.request, f"{user.username} muvaffaqiyatli qo‘shildi! Xush kelibsiz! 😊")
+        return super().form_valid(form)
 
 
+class UserLoginView(LoginView):
+    form_class = LoginForm
+    template_name = "user_login.html"
 
-def user_login(request):
-    if request.method == "POST":
-        form = LoginForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            messages.success(request, f"Xush kelibsiz {user.first_name} {user.last_name}")
-            return redirect('index')
-    else:
-        form = LoginForm()
-    context = {
-        'form' : form
-    }
+    def get_success_url(self):
+        return reverse_lazy("index")
 
-    return render(request, 'user_login.html', context)
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        user = self.request.user
+        messages.success(self.request, f"Xush kelibsiz {user.first_name} {user.last_name}")
+        return response
+
+
+class UserLogoutView(LogoutView):
+    next_page = reverse_lazy("user_login")
+
+    def dispatch(self, request, *args, **kwargs):
+        messages.warning(request, "Siz akkauntni tark etdingiz, janob!")
+        return super().dispatch(request, *args, **kwargs)
 
 
 
-@login_required
-def user_logout(request):
-    logout(request)
-    messages.warning(request, f"Siz akoutni tark etingiz janob !")
-    return redirect("user_login")
+class UserProfileView(DetailView):
+    model = Profile
+    template_name = "profile.html"
+    context_object_name = "profile"
 
-def profile(request, username):
+    def get_object(self, queryset=None):
+        """Foydalanuvchi profilini topish"""
+        username = self.kwargs.get("username")
+        return get_object_or_404(Profile, user__username=username)
 
-    context = {}
-    try:
-        user = get_object_or_404(User, username=username)
-        car = Cars.objects.filter(author=user)
-        profile = get_object_or_404(Profile, user=user)
-        context['profile'] = profile
-        context['car'] = car
-    except Exception as e:
-        messages.error(request, f"{e}")
-        return redirect('index')
-    return render(request, "profile.html", context)
+    def get_context_data(self, **kwargs):
+        """Qo‘shimcha kontekst qo‘shish"""
+        context = super().get_context_data(**kwargs)
+        user = self.object.user
+        context["cars"] = Cars.objects.filter(author=user)
+        return context
 
 
-def send_message_to_email(request):
-    if request.method == "POST":
+
+
+
+class SendMailView(View):
+    def post(self, request):
         form = SendEmail(data=request.POST)
         if form.is_valid():
             subject = form.cleaned_data.get("subject")
@@ -164,9 +177,29 @@ def send_message_to_email(request):
                 )
         messages.success(request, "Habar yuborildi")
         return redirect('index')
-    else:
+
+    def get(self, request):
         form = SendEmail()
-    context = {
-        'form':form
-    }
-    return render(request, 'send_main.html', context)
+        context = {
+            'form': form
+        }
+        return render(request, 'send_main.html', context)
+
+
+class AddBrandView(CreateView):
+    model = Brands
+    form_class = BrandsForm
+    template_name = "add_brands.html"
+    success_url = reverse_lazy("index")
+
+class AddCarView(CreateView):
+    model = Cars
+    form_class = CarsForm
+    template_name = "add_cars.html"
+    success_url = reverse_lazy("brands_detail")
+
+class AddColorView(CreateView):
+    model = Color
+    form_class = ColorForm
+    template_name = "add_color.html"
+    success_url = reverse_lazy("index")

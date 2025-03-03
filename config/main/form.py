@@ -29,6 +29,7 @@ class ColorForm(forms.ModelForm):
         labels = {
             'color': 'Moshina rangi',
         }
+
 class CommentFrom(forms.ModelForm):
     class Meta:
         model = Comment

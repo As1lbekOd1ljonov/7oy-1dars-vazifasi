@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block comment %}
+<div class="container mt-4">
+    <h2 class="text-primary">Yangi Rang qo‘shish</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Qo‘shish</button>
+    </form>
+</div>
+{% endblock comment %}

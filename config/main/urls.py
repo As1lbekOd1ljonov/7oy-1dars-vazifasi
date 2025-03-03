@@ -1,23 +1,35 @@
 from django.urls import path
 from .views import (
-    index, color_detail, brand_detail, car_detail, user_register,
-    user_login, user_logout, profile, send_message_to_email)
+    IndexListView, ColorDetailView, BrandDetailView, CarDetailView, UserRegisterView,
+    UserLoginView, UserLogoutView, UserProfileView, SendMailView, CommentManageView, AddBrandView, AddCarView,
+    AddColorView, )
+
+
+
+
 urlpatterns = [
-    path('', index, name='index'),
+    path('', IndexListView.as_view(), name='index'),
 
-    path('color/<int:color_id>/', color_detail, name='color_detail'),
+    path('color/<int:pk>/', ColorDetailView.as_view(), name='color_detail'),
 
-    path('brand/<int:brand_id>/', brand_detail, name='brand_detail'),
+    path('brand/<int:pk>/', BrandDetailView.as_view(), name='brand_detail'),
 
-    path('car/<int:car_id>/', car_detail, name='car_detail'),
+    path('car/<int:pk>/', CarDetailView.as_view(), name='car_detail'),
 
-    path('register/', user_register, name='user_register'),
+    path('car/<int:car_id>/comment/', CommentManageView.as_view(), name='comment_manage'),
 
-    path('login/', user_login, name='user_login'),
+    path('register/', UserRegisterView.as_view(), name='user_register'),
 
-    path('logout/', user_logout, name='user_logout'),
-    path('profile/<str:username>', profile, name='profile'),
+    path('login/', UserLoginView.as_view(), name='user_login'),
 
-    path('send_message/', send_message_to_email, name='send_message')
+    path('logout/', UserLogoutView.as_view(), name='user_logout'),
+
+    path('profile/<str:username>', UserProfileView.as_view(), name='profile'),
+
+    path('send_message/', SendMailView.as_view(), name='send_message'),
+
+    path('add_brand/', AddBrandView.as_view(), name='add_brand'),
+    path('add_car/', AddCarView.as_view(), name='add_cars'),
+    path('add_color/', AddColorView.as_view(), name='add_color'),
 
 ]

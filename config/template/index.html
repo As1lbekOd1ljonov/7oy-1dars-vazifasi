@@ -4,14 +4,14 @@
 {% block comment %}
             <div class="container d-flex flex-wrap gap-2 " >
                     {%for rang in color %}
-                    <a href="{% url 'color_detail' color_id=rang.id%}">
+                    <a href="{% url 'color_detail' pk=rang.id%}">
                         <button type="submit" class="btn btn-primary px-4 py-2 w-100" >{{rang.color}}</button>
                     </a>
                     {% endfor %}
             </div>
             <div class="container d-flex flex-wrap gap-2 mt-4">
                 {% for brand in brands %}
-                    <a href="{% url 'brand_detail' brand_id=brand.id%}">
+                    <a href="{% url 'brand_detail' pk=brand.id%}">
                         <button type="submit" class="btn btn-success px-4 py-2 w-100">{{ brand.name }}</button>
                     </a>
                 {% endfor %}
