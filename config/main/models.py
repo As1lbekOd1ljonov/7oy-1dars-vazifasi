@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import SET_NULL
 from django.core.validators import FileExtensionValidator
+from django.urls import reverse_lazy
 
 
 class Profile(models.Model):
@@ -44,6 +45,9 @@ class Cars(models.Model):
     color = models.ForeignKey(Color, on_delete=models.SET_NULL, null=True)
     author = models.ForeignKey(User, on_delete=models.PROTECT)
 
+
+    def get_absolute_url(self):
+        return reverse_lazy('car_detail')
 
     def __str__(self):
         return f"{self.car_name} {self.brand} {self.date} {self.color}"

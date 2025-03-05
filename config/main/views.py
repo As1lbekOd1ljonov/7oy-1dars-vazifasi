@@ -1,3 +1,5 @@
+from django.urls import reverse
+from django.core.paginator import Paginator
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
 from django.http import HttpRequest, HttpResponseForbidden
@@ -14,18 +16,34 @@ from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
 
+
+
 class IndexListView(ListView):
-    model = Cars  # Bu qator xatoni tuzatadi
+    model = Cars
     template_name = "index.html"
     context_object_name = "cars"
+    paginate_by = 2
 
     def get_context_data(self, **kwargs):
         """Barcha kerakli ma’lumotlarni kontekstga qo‘shish"""
         context = super().get_context_data(**kwargs)
         context["brands"] = Brands.objects.all()
         context["color"] = Color.objects.all()
-        context["cars"] = Cars.objects.all()
         return context
+
+# class IndexListView(ListView):
+#     model = Cars
+#     template_name = "index.html"
+#     context_object_name = "cars"
+#     paginate_by = 4
+#
+#     def get_context_data(self, **kwargs):
+#         """Barcha kerakli ma’lumotlarni kontekstga qo‘shish"""
+#         context = super().get_context_data(**kwargs)
+#         context["brands"] = Brands.objects.all()
+#         context["color"] = Color.objects.all()
+#         context["cars"] = Cars.objects.all()
+#         return context
 
 
 
@@ -68,6 +86,63 @@ class CarDetailView(PermissionRequiredMixin, DetailView):
         context["comments"] = Comment.objects.filter(car=self.object)
         context["form"] = CommentFrom()
         return context
+
+
+class CarUpdateView(UpdateView):
+    model = Cars
+    form_class = CarsForm
+    template_name = 'add_cars.html'
+
+    def get_success_url(self):
+        return reverse("car_detail", kwargs={"pk": self.object.pk})
+
+class CarDeleteView(DeleteView):
+    model = Cars
+    template_name = "confirm_delete.html"
+
+    def get_success_url(self):
+        return reverse("index")
+
+
+
+
+class CarCreateView(CreateView):
+    model = Cars
+    template_name = "add_cars.html"
+    fields = ['car_name', 'brand', 'date', 'price', 'color']
+
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("car_detail", kwargs={"pk": self.object.pk})
+
+
+
+
+# class CarUpdateDeleteView(View):
+#     """Mashinalarni tahrirlash va o‘chirishni boshqarish"""
+#
+#     def post(self, request, car_id):
+#         car = get_object_or_404(Cars, id=car_id)
+#         action = request.POST.get("action")
+#
+#         if action == "update":
+#             if request.user == car.owner or request.user.is_superuser:
+#                 form = CarsForm(request.POST, request.FILES, instance=car)
+#                 if form.is_valid():
+#                     form.save()
+#                 return redirect("car_detail", pk=car.id)
+#             return HttpResponseForbidden("Siz ushbu mashinani tahrirlash huquqiga ega emassiz!")
+#
+#         elif action == "delete":
+#             if request.user == car.owner or request.user.is_superuser:
+#                 car.delete()
+#                 return redirect("index")
+#             return HttpResponseForbidden("Siz ushbu mashinani o‘chira olmaysiz!")
+#
+#         return redirect("car_detail", pk=car.id)
 
 
 class CommentManageView(View):

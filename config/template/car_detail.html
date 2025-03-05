@@ -21,6 +21,10 @@
                         <p><b>Yili:</b> {{ car.date }}</p>
                         <p><b>Narxi:</b> ${{ car.price }}</p>
                         <p><b>Rangi:</b> {{ car.color }}</p>
+                        <div width="100%" class="d-flex justify-content-end ">
+                            <a href="{% url 'car_update' pk=car.id %}"><i class="fas fa-pen-to-square fa-2x"></i></a> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                            <a href="{% url 'car_delete' pk=car.id %}"><i class="fas fa-trash-can fa-2x"></i></a>
+                        </div>
                     </li>
                 </ul>
             </div>
