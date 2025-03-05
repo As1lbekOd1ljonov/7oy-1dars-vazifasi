@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block comment %}
-  <h2>O'chirishni tasdiqlaysizmi?</h2>
+<div class="container">
+    <h2>O'chirishni tasdiqlaysizmi?</h2>
   <p>Haqiqatan ham "{{ object }}" ni o‘chirmoqchimisiz?</p>
   <form method="post">
     {% csrf_token %}
     <button type="submit" class="btn btn-primary px-4 py-2 w-20">Ha, o‘chirish</button>
     <a href="{% url 'car_detail' object.pk %}">Bekor qilish</a>
   </form>
+</div>
 {% endblock %}
